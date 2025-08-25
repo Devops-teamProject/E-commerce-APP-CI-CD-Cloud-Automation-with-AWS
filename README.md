@@ -1,1 +1,0 @@
-# E-commerce-APP-CI-CD-Cloud-Automation-with-AWS
