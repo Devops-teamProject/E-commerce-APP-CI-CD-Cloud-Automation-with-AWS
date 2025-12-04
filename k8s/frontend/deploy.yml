@@ -28,7 +28,7 @@ spec:
               echo "Backend is ready!"
       containers:
         - name: frontend
-          image: ahmeddaoud97/frontend:1.0
+          image: osos3/front:latest
           ports:
             - containerPort: 8080
           env:

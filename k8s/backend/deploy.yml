@@ -33,7 +33,7 @@ spec:
 
       containers:
         - name: backend
-          image: ahmeddaoud97/backend:1.0
+          image: osos3/back:latest
           ports:
             - containerPort: 5000
           env:

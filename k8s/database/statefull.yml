@@ -66,11 +66,10 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: mongo-data
-      spec:     
-        storageClassName: gp2
+      spec:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
             storage: 5Gi
-
-      
+     #  storageClassName: local-path
+        storageClassName: gp2-retain

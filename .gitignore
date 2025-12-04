@@ -3,16 +3,3 @@ node_modules/
 dist/
 .vscode/
 mongo-backup
-.terraform/
-.terraform.lock.hcl
-*.tfstate
-*.tfstate.backup
-crash.log
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
-.idea/
-.DS_Store
-.terraformrc
-terraform.rc    
