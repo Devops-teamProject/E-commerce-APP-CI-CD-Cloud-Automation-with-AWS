@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front-deployment
+  namespace: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      initContainers:
+        - name: check-backend
+          image: curlimages/curl:8.2.1
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for backend..."
+              until curl -s http://backend-svc.backend.svc.cluster.local:5000/health/ready; do
+                echo "Backend not ready, sleeping 3s..."
+                sleep 3
+              done
+              echo "Backend is ready!"
+      containers:
+        - name: frontend
+          image: ahmeddaoud97/frontend:1.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: BACKEND_HOST
+              value: backend-svc.backend.svc.cluster.local
+            - name: BACKEND_PORT
+              value: "5000"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"

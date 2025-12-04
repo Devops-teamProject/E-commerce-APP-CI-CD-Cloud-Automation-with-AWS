@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-init-scripts
+  namespace: mongo-db
+data:
+  init-mongo.js: |
+    // runs during first container init (mounted to /docker-entrypoint-initdb.d/)
+    db = db.getSiblingDB('ecommerce');
+
+    db.createUser({
+      user: "appuser",
+      pwd: "apppassword",
+      roles: [
+        { role: "readWrite", db: "ecommerce" }
+      ]
+    });

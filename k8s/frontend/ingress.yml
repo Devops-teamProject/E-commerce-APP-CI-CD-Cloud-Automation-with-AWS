@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: front-ingress
+  namespace: frontend
+  annotations:
+    kubernetes.io/ingress.class: alb                    
+    alb.ingress.kubernetes.io/scheme: internet-facing 
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+    
+spec:
+  ingressClassName: alb
+  #ingressClassName: nginx
+  # tls:
+  #   - hosts: []
+  #     secretName: ingress-tls
+  rules:
+    #host: lb-382757127.us-east-1.elb.amazonaws.com
+  -  http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: front-svc
+            port: 
+              number: 8080
