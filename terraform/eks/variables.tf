@@ -23,6 +23,12 @@ variable "cluster_version" {
   default     = "1.30"
   
 }
+variable "cluster_name" {
+  description = "Name of the EKS cluster"
+  type        = string
+  default     = "ecommerce-eks-cluster"
+  
+}
 
 # -------------------------------------------------------------------------
 # Node Group Configuration
@@ -123,4 +129,47 @@ variable "admin_user_arn" {
   type        = string
   default     = "arn:aws:iam::737427925739:user/Admin-terraform"
   
+}
+
+variable "admin_user_arn_github_actions" {
+  description = "ARN of the IAM role for GitHub Actions to grant admin access to EKS cluster"
+  type        = string
+  default     = "arn:aws:iam::737427925739:user/Github-action"
+
+}
+
+# -------------------------------------------------------------------------
+# Application Configuration
+# -------------------------------------------------------------------------
+# Version of AWS Load Balancer Controller Helm chart
+
+variable "alb_controller_version" {
+  description = "Version of AWS Load Balancer Controller Helm chart"
+  type        = string
+  default     = "1.8.1"
+}
+
+# -------------------------------------------------------------------------
+# Tagging Configuration
+# -------------------------------------------------------------------------
+# Environment name: Used for tagging resources
+variable "environment" {
+  description = "Environment name (e.g., Dev, Staging, Production)"
+  type        = string
+  default     = "Dev"
+
+  # Validation: Only allow specific environment names
+
+  validation {
+    condition     = contains(["Dev", "Staging", "Production"], var.environment)
+    error_message = "Environment must be Dev, Staging, or Production."
+  }
+}
+
+# Project name: Used for tagging and resource naming
+
+variable "project_name" {
+  description = "Project name for tagging"
+  type        = string
+  default     = "ECOMMERCE-EKS"
 }

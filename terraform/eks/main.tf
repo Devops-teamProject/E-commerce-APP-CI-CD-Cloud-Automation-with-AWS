@@ -4,15 +4,7 @@
 # This file creates a complete EKS cluster.
 # =========================================================================
 
-# -------------------------------------------------------------------------
-# Local Variables
-# -------------------------------------------------------------------------
-# Define reusable values to avoid repetition and maintain consistency
-locals {
-  cluster_name = "ecommerce-eks-cluster"
-  environment  = "Dev"
-  project      = "ECOMMERCE-EKS"
-}
+
 
 # -------------------------------------------------------------------------
 # VPC Module - Network Infrastructure
@@ -43,21 +35,21 @@ module "vpc" {
   # The ALB controller uses these tags to discover where to create load balancers
   public_subnet_tags = {
     "kubernetes.io/role/elb" = "1"  # Tells ALB controller: use these for public ALBs
-    "kubernetes.io/cluster/${local.cluster_name}" = "shared"  # Links subnet to cluster
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"  # Links subnet to cluster
   }
 
   # Tags for private subnets - Required by AWS Load Balancer Controller
   # For internal load balancers (within VPC only)
   private_subnet_tags = {
     "kubernetes.io/role/internal-elb" = "1"  # For internal ALBs
-    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
   }
 
   tags = {
-    Name        = "ecommerce-eks-vpc"
-    Environment = local.environment
-    Project     = local.project
-  }
+    Name        = "${var.project_name}-vpc"
+    Environment = var.environment
+    Project     = var.project_name    
+  } 
 }
 
 # -------------------------------------------------------------------------
@@ -71,7 +63,7 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.8.4"
 
-  cluster_name    = local.cluster_name
+  cluster_name    = var.cluster_name
   cluster_version = var.cluster_version    # Kubernetes version
   
   enable_irsa = true             # Enable IRSA: Allows Kubernetes service accounts to assume IAM roles
@@ -93,7 +85,7 @@ module "eks" {
       instance_types = var.node_instance_types  # EC2 instance type (2 vCPU, 4GB RAM)
 
       tags = {
-        Name = "ecommerce-eks-nodes"
+        Name = "${var.project_name}-${var.cluster_name}-nodes"
       }
     }
   }
@@ -124,8 +116,8 @@ module "eks" {
   }
 
   tags = {
-    Environment = local.environment
-    Project     = local.project
+    Environment = var.environment
+    Project     = var.project_name
   }
 }
 
@@ -177,7 +169,7 @@ resource "aws_eks_access_policy_association" "admin_access" {
 
 resource "aws_eks_access_entry" "admin_github_action" {
   cluster_name  = module.eks.cluster_name
-  principal_arn = "arn:aws:iam::737427925739:user/Github-action"  # Your IAM user ARN
+  principal_arn = var.admin_user_arn_github_actions  # Your IAM user ARN
   type          = "STANDARD"  # Standard user (not EC2 node)
 
   depends_on = [module.eks]
@@ -211,11 +203,7 @@ resource "aws_eks_access_policy_association" "admin_access_github" {
 # -------------------------------------------------------------------------
 # The EBS CSI Driver needs AWS permissions to:
 # - Create/attach/delete EBS volumes
-# - Take snapshots
-# - Manage volume lifecycle
 
-# Define trust policy: Who can assume this role?
-# Answer: The ebs-csi-controller-sa service account in kube-system namespace
 data "aws_iam_policy_document" "ebs_csi_assume_role" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]  # Use OIDC for authentication
@@ -248,9 +236,9 @@ resource "aws_iam_role" "ebs_csi" {
   assume_role_policy = data.aws_iam_policy_document.ebs_csi_assume_role.json
 
   tags = {
-    Name        = "eks-ebs-csi-driver"
-    Environment = local.environment
-    Project     = local.project
+    Name        = "${var.project_name}-ebs-csi-driver"
+    Environment = var.environment
+    Project     = var.project_name
   }
 }
 
@@ -267,10 +255,7 @@ resource "aws_iam_role_policy_attachment" "ebs_csi" {
 # - Create/delete Application Load Balancers (ALBs)
 # - Manage target groups (route traffic to pods)
 # - Configure security groups and listeners
-# - Update Route53 DNS records (if using)
 
-# Define trust policy: Who can assume this role?
-# Answer: The aws-load-balancer-controller service account
 data "aws_iam_policy_document" "alb_assume_role" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
@@ -298,13 +283,13 @@ data "aws_iam_policy_document" "alb_assume_role" {
 
 # Create the IAM role
 resource "aws_iam_role" "alb_controller" {
-  name               = "eks-alb-controller-${local.cluster_name}"
+  name               = "${var.project_name}-${var.cluster_name}-alb-controller"
   assume_role_policy = data.aws_iam_policy_document.alb_assume_role.json
 
   tags = {
-    Name        = "eks-alb-controller"
-    Environment = local.environment
-    Project     = local.project
+    Name        = "${var.project_name}-${var.cluster_name}-alb-controller"
+    Environment = var.environment
+    Project     = var.project_name
   }
 }
 
@@ -316,14 +301,14 @@ data "http" "alb_iam_policy" {
 
 # Create IAM policy from the fetched JSON
 resource "aws_iam_policy" "alb_controller" {
-  name        = "AWSLoadBalancerControllerIAMPolicy-${local.cluster_name}"
+  name        = "AWSLoadBalancerControllerIAMPolicy-${var.cluster_name}"
   description = "IAM policy for AWS Load Balancer Controller"
   policy      = data.http.alb_iam_policy.response_body
 
   tags = {
-    Name        = "alb-controller-policy"
-    Environment = local.environment
-    Project     = local.project
+    Name        = "${var.project_name}-${var.cluster_name}-alb-controller-policy"
+    Environment = var.environment
+    Project     = var.project_name
   }
 }
 
@@ -341,7 +326,7 @@ resource "aws_iam_role_policy_attachment" "alb_controller" {
 
 resource "kubernetes_service_account" "alb_controller" {
   metadata {
-    name      = "aws-load-balancer-controller"
+    name      = "${var.project_name}-${var.cluster_name}-aws-load-balancer-controller"
     namespace = "kube-system"
     
     # This annotation links the service account to the IAM role

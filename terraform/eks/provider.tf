@@ -41,8 +41,8 @@ provider "aws" {
   default_tags {
     tags = {
       ManagedBy   = "Terraform"      # Indicates this is IaC
-      Environment = "Dev"             # Environment name
-      Project     = "ECOMMERCE-EKS"  # Project identifier
+      Environment = var.environment             # Environment name
+      Project     = var.project_name  # Project identifier
     }
   }
 }
