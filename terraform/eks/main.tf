@@ -27,9 +27,9 @@ module "vpc" {
   
   private_subnets = var.private_subnet_cidrs                        
 
-  enable_nat_gateway = true                                       
+  enable_nat_gateway = var.enable_nat_gateway        # Enable NAT Gateway for private subnet internet access                                      
   
-  single_nat_gateway = true                                       # Use single NAT Gateway to save costs (all private subnets share it)
+  single_nat_gateway = var.single_nat_gateway                                      # Use single NAT Gateway to save costs (all private subnets share it)
 
   # Tags for public subnets - Required by AWS Load Balancer Controller
   # The ALB controller uses these tags to discover where to create load balancers
@@ -232,7 +232,7 @@ data "aws_iam_policy_document" "ebs_csi_assume_role" {
 
 # Create the IAM role
 resource "aws_iam_role" "ebs_csi" {
-  name               = "eks-ebs-csi-driver-${local.cluster_name}"
+  name               = "eks-ebs-csi-driver-${var.cluster_name}"
   assume_role_policy = data.aws_iam_policy_document.ebs_csi_assume_role.json
 
   tags = {
@@ -253,8 +253,7 @@ resource "aws_iam_role_policy_attachment" "ebs_csi" {
 # -------------------------------------------------------------------------
 # The ALB Controller needs AWS permissions to:
 # - Create/delete Application Load Balancers (ALBs)
-# - Manage target groups (route traffic to pods)
-# - Configure security groups and listeners
+
 
 data "aws_iam_policy_document" "alb_assume_role" {
   statement {
@@ -326,7 +325,7 @@ resource "aws_iam_role_policy_attachment" "alb_controller" {
 
 resource "kubernetes_service_account" "alb_controller" {
   metadata {
-    name      = "${var.project_name}-${var.cluster_name}-aws-load-balancer-controller"
+    name      = "aws-load-balancer-controller"
     namespace = "kube-system"
     
     # This annotation links the service account to the IAM role

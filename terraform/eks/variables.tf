@@ -118,6 +118,18 @@ variable "private_subnet_cidrs" {
   default     = ["10.10.3.0/24", "10.10.4.0/24"]
   
 }
+variable "enable_nat_gateway" {
+  description = "Enable NAT Gateway for private subnet internet access"
+  type        = bool
+  default     = true
+  
+}
+variable "single_nat_gateway" {
+  description = "Use single NAT Gateway to save costs (all private subnets share it)"
+  type        = bool
+  default     = true
+  
+}
 
 # -------------------------------------------------------------------------
 # IAM Configuration

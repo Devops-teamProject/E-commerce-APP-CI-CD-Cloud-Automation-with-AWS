@@ -30,6 +30,14 @@ terraform {
                             } 
   }
 
+  backend "s3" {
+    bucket         = "terraform-state-file-depi"      # S3 bucket name
+    key            = "eks/terraform.tfstate"            # Path to state file
+    region         = "us-east-1"                        # S3 bucket region
+    encrypt        = true                                # Encrypt state file
+    dynamodb_table = "terraform-state-lock-depi"             # For state locking
+  }
+
 }
 # -------------------------------------------------------------------------
 # AWS Provider Configuration
