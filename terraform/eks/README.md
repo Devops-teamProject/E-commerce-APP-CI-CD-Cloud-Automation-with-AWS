@@ -300,34 +300,6 @@ Type `yes` when prompted.
 ├── terraform.tfvars  # Variable values (create this file)
 └── README.md         # This file
 ```
-### Customizing the Deployment
-
-#### Change AWS Region
-
-```hcl
-# terraform.tfvars
-region = "eu-west-1"
-availability_zones = ["eu-west-1a", "eu-west-1b"]
-```
-
-#### Adjust Node Group Size
-
-```hcl
-# terraform.tfvars
-node_desired_size = 3
-node_min_size     = 2
-node_max_size     = 6
-node_instance_types = ["t3.large"]
-```
-
-#### Use Different VPC CIDR
-
-```hcl
-# terraform.tfvars
-vpc_cidr             = "172.16.0.0/16"
-public_subnet_cidrs  = ["172.16.1.0/24", "172.16.2.0/24"]
-private_subnet_cidrs = ["172.16.3.0/24", "172.16.4.0/24"]
-```
 
 ---
 
@@ -503,113 +475,11 @@ terraform output cluster_certificate_authority_data > ca.crt
 export TOKEN=$(aws eks get-token --cluster-name ecommerce-eks-cluster --region us-east-1 | jq -r .status.token)
 ```
 
----
-
-## 📦 Deploying Applications
-
-### Example 1: Simple Nginx Deployment
-
-```bash
-kubectl create deployment nginx --image=nginx:latest
-kubectl expose deployment nginx --port=80 --type=LoadBalancer
-```
-
-Wait for external IP:
-```bash
-kubectl get svc nginx --watch
-```
-
-[📸 **ADD SCREENSHOT HERE: Application load balancer created**]
-
-### Example 2: Using Ingress with ALB
-
-Create `ingress.yaml`:
-
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: ecommerce-ingress
-  annotations:
-    alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/target-type: ip
-spec:
-  ingressClassName: alb
-  rules:
-  - http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: nginx
-            port:
-              number: 80
-```
-
-Deploy:
-```bash
-kubectl apply -f ingress.yaml
-```
-
-Check ALB creation:
-```bash
-kubectl get ingress ecommerce-ingress
-```
-
-[📸 **ADD SCREENSHOT HERE: Ingress with ALB address**]
-
-### Example 3: Using Persistent Storage
-
-Create `pvc.yaml`:
-
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: ebs-claim
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: gp2
-  resources:
-    requests:
-      storage: 10Gi
-```
-
-Deploy:
-```bash
-kubectl apply -f pvc.yaml
-kubectl get pvc
-```
-
-[📸 **ADD SCREENSHOT HERE: PVC bound to EBS volume**]
-
----
 
 ## 🔧 Troubleshooting
 
-### Issue 1: Nodes Not Joining Cluster
 
-**Symptoms:**
-```bash
-kubectl get nodes
-# No resources found
-```
-
-**Solution:**
-```bash
-# Check node group status
-aws eks describe-nodegroup \
-  --cluster-name ecommerce-eks-cluster \
-  --nodegroup-name ecommerce-eks-nodes
-
-# Check EC2 instances
-aws ec2 describe-instances \
-  --filters "Name=tag:eks:cluster-name,Values=ecommerce-eks-cluster"
-```
-
-### Issue 2: ALB Controller Not Creating Load Balancers
+### Issue 1: ALB Controller Not Creating Load Balancers
 
 **Symptoms:**
 - Ingress created but no ALB appears
@@ -626,27 +496,8 @@ aws iam get-role --role-name eks-alb-controller-ecommerce-eks-cluster
 aws ec2 describe-subnets --subnet-ids $(terraform output -json public_subnets | jq -r '.[]')
 ```
 
-### Issue 3: Pods Can't Pull Images
 
-**Symptoms:**
-```bash
-kubectl get pods
-# STATUS: ImagePullBackOff or ErrImagePull
-```
-
-**Solution:**
-```bash
-# Check NAT Gateway
-aws ec2 describe-nat-gateways
-
-# Verify route tables
-aws ec2 describe-route-tables --filters "Name=vpc-id,Values=$(terraform output -raw vpc_id)"
-
-# Test internet from pod
-kubectl run test --image=busybox --rm -it -- ping 8.8.8.8
-```
-
-### Issue 4: Permission Denied When Running kubectl
+### Issue 2: Permission Denied When Running kubectl
 
 **Symptoms:**
 ```
@@ -664,40 +515,22 @@ aws sts get-caller-identity
 # Check EKS access entries
 aws eks list-access-entries --cluster-name ecommerce-eks-cluster
 ```
-
-### Issue 5: EBS Volumes Not Attaching
-
-**Symptoms:**
-- PVC stuck in `Pending` state
-
-**Solution:**
-```bash
-# Check EBS CSI driver pods
-kubectl get pods -n kube-system | grep ebs-csi
-
-# View driver logs
-kubectl logs -n kube-system deployment/ebs-csi-controller
-
-# Verify IAM role
-aws iam get-role --role-name eks-ebs-csi-driver-ecommerce-eks-cluster
-```
-
 ---
 
 ## 💰 Cost Estimation
 
 ### Monthly Cost Breakdown (us-east-1)
 
-| Component | Quantity | Unit Cost | Monthly Cost |
-|-----------|----------|-----------|--------------|
-| **EKS Control Plane** | 1 cluster | $0.10/hour | ~$73 |
-| **EC2 Instances (t3.medium)** | 2 nodes | $0.0416/hour | ~$60 |
-| **NAT Gateway** | 1 gateway | $0.045/hour | ~$32 |
-| **NAT Gateway Data** | 100 GB | $0.045/GB | ~$5 |
-| **EBS Volumes (gp2)** | 40 GB | $0.10/GB-month | ~$4 |
-| **Application Load Balancer** | 1 ALB | $0.0225/hour | ~$16 |
-| **ALB LCU Hours** | Variable | $0.008/LCU-hour | ~$6 |
-| | | **Total** | **~$196/month** |
+| Component                     | Quantity        | Unit Cost       | Monthly Cost |
+|-------------------------------|-----------------|-----------------|--------------|
+| **EKS Control Plane**         | 1 cluster       | $0.10/hour      | ~$73         |
+| **EC2 Instances (t3.medium)** | 2 nodes         | $0.0416/hour    | ~$60         |
+| **NAT Gateway**               | 1 gateway       | $0.045/hour     | ~$32         |
+| **NAT Gateway Data**          | 100 GB          | $0.045/GB       | ~$5          |
+| **EBS Volumes (gp2)**         | 40 GB           | $0.10/GB-month  | ~$4          | 
+| **Application Load Balancer** | 1 ALB           | $0.0225/hour    | ~$16         |
+| **ALB LCU Hours**             | Variable        | $0.008/LCU-hour | ~$6          |
+| | | **Total**                 | **~$196/month** |
 
 ### Cost Optimization Tips
 
@@ -728,47 +561,6 @@ aws iam get-role --role-name eks-ebs-csi-driver-ecommerce-eks-cluster
 - Pod Security Standards ready
 - Network policies ready (requires network policy controller)
 
-### Additional Recommendations
-
-1. **Enable Encryption**
-```hcl
-# Add to EKS module
-cluster_encryption_config = {
-  resources        = ["secrets"]
-  provider_key_arn = aws_kms_key.eks.arn
-}
-```
-
-2. **Enable Cluster Logging**
-```hcl
-# Add to EKS module
-cluster_enabled_log_types = [
-  "api",
-  "audit",
-  "authenticator",
-  "controllerManager",
-  "scheduler"
-]
-```
-
-3. **Use Private Endpoint**
-```hcl
-# For production
-cluster_endpoint_public_access  = false
-cluster_endpoint_private_access = true
-```
-
-4. **Enable Pod Security Standards**
-```bash
-kubectl label namespace default pod-security.kubernetes.io/enforce=baseline
-```
-
-5. **Implement Network Policies**
-```bash
-# Install Calico or Cilium for network policies
-helm repo add projectcalico https://docs.projectcalico.org/charts
-helm install calico projectcalico/tigera-operator
-```
 
 ---
 
@@ -824,31 +616,6 @@ terraform destroy -auto-approve
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 📝 Notes
-
-- This infrastructure is designed for **development and testing**
-- For **production**, consider:
-  - Multiple NAT Gateways (one per AZ)
-  - Private cluster endpoint
-  - Enhanced monitoring with CloudWatch Container Insights
-  - AWS GuardDuty for threat detection
-  - AWS Config for compliance
-  - Backup strategy for persistent volumes
-  
----
-
 ## 📚 Additional Resources
 
 - [AWS EKS Documentation](https://docs.aws.amazon.com/eks/)
@@ -856,14 +623,6 @@ Contributions are welcome! Please follow these steps:
 - [AWS Load Balancer Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/)
 - [EBS CSI Driver](https://github.com/kubernetes-sigs/aws-ebs-csi-driver)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
-
----
-
-## 📧 Support
-
-For issues and questions:
-- Open an issue in this repository
-- Contact: [your-email@example.com]
 
 ---
 
