@@ -16,12 +16,12 @@ Complete AWS EKS infrastructure deployment using Terraform for a production-read
 - [Cost Estimation](#cost-estimation)
 - [Security Best Practices](#security-best-practices)
 - [Clean Up](#clean-up)
-- [Contributing](#contributing)
+- [Additional Resources](#Additional-Resources)
 
 
 ---
 
-## 🎯 Overview
+## Overview
 
 This project provisions a complete Kubernetes infrastructure on AWS EKS with the following features:
 
@@ -34,7 +34,7 @@ This project provisions a complete Kubernetes infrastructure on AWS EKS with the
 
 ---
 
-## 🏗️ Architectures
+## Architecture
 
 
 ### Network Architecture
@@ -153,7 +153,7 @@ graph LR
 
 ---
 
-## 📦 Prerequisites
+## Prerequisites
 
 ### Required Tools
 
@@ -181,6 +181,7 @@ aws configure
 ```
 
 ---
+
 ## Project Structure
 
 ```
@@ -195,7 +196,7 @@ aws configure
 
 ---
 
-## 🧩 Infrastructure Components
+## Infrastructure Components
 
 ### VPC Configuration
 
@@ -242,13 +243,9 @@ aws configure
 - **Deployment:** Helm chart
 - **Purpose:** Automatically provisions ALBs/NLBs for Kubernetes Ingress resources
 
-
-
 ---
 
-
-
-## 🚀 Deployment Steps
+## Deployment Steps
 
 ### Step 1: Pre-deployment Checklist
 
@@ -323,7 +320,7 @@ terraform output > outputs.txt
 
 ---
 
-## ✅ Verification
+## Verification
 
 ### 1. Verify AWS Resources
 
@@ -398,7 +395,7 @@ kubectl logs -n kube-system deployment/aws-load-balancer-controller
 
 ---
 
-## 🔐 Accessing the Cluster
+## Accessing the Cluster
 
 ### Method 1: Using AWS CLI (Recommended)
 
@@ -424,7 +421,7 @@ export TOKEN=$(aws eks get-token --cluster-name ecommerce-eks-cluster --region u
 ```
 
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 
 ### Issue 1: ALB Controller Not Creating Load Balancers
@@ -465,7 +462,7 @@ aws eks list-access-entries --cluster-name ecommerce-eks-cluster
 ```
 ---
 
-## 💰 Cost Estimation
+## Cost Estimation
 
 ### Monthly Cost Breakdown (us-east-1)
 
@@ -490,7 +487,7 @@ aws eks list-access-entries --cluster-name ecommerce-eks-cluster
 
 ---
 
-## 🔒 Security Best Practices
+## Security Best Practices
 
 ### Implemented Security Features
 
@@ -512,7 +509,7 @@ aws eks list-access-entries --cluster-name ecommerce-eks-cluster
 
 ---
 
-## 🗑️ Clean Up
+## Clean Up
 
 ### Delete All Resources
 
@@ -560,9 +557,10 @@ aws ec2 describe-security-groups --filters "Name=vpc-id,Values=vpc-xxx"
 terraform destroy -auto-approve
 ```
 ![Terraform-destroy](images/Terraform-destroy.png)
+
 ---
 
-## 📚 Additional Resources
+## Additional Resources
 
 - [AWS EKS Documentation](https://docs.aws.amazon.com/eks/)
 - [Terraform AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
