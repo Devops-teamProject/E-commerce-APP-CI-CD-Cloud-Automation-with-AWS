@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongo-pv-1
+  labels:
+    app: mongo
+    instance: mongo-0  
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: gp2-retain
+  awsElasticBlockStore:  
+    volumeID: vol-0a126c942619bb86f
