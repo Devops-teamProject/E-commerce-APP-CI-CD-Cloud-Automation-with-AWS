@@ -125,7 +125,7 @@ Private Subnets (2 AZs)
 ![eks](images/eks.png)
 
 Nodes Console Screenshot:
-![nodes](images/nodes.png)
+![nodes](images/nodes-console.png)
 
 ### Terraform Resources Flow
 
