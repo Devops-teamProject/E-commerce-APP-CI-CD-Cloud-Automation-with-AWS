@@ -290,7 +290,7 @@ terraform plan -out=tfplan
 
 ![Terraform plan](images/Terraform-plan-1.png)
 
-![Terraform plan](images/Terraform-plan-2png)
+![Terraform plan](images/Terraform-plan-2.png)
 
 
 
@@ -343,7 +343,7 @@ aws eks describe-cluster --name ecommerce-eks-cluster --region us-east-1
 aws eks describe-nodegroup --cluster-name ecommerce-eks-cluster --nodegroup-name ecommerce-eks-nodes --region us-east-1
 ```
 
-![Nodes](images/nodes-console.png)
+![Nodes](images/describe-nodegroup.png)
 
 ### 2. Configure kubectl
 
