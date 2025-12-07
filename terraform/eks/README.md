@@ -7,13 +7,11 @@ Complete AWS EKS infrastructure deployment using Terraform for a production-read
 - [Overview](#overview)
 - [Architecture](#architecture)
 - [Prerequisites](#prerequisites)
+- [Project Structure](#Project-Structure)
 - [Infrastructure Components](#infrastructure-components)
-- [Quick Start](#quick-start)
-- [Configuration](#configuration)
 - [Deployment Steps](#deployment-steps)
 - [Verification](#verification)
 - [Accessing the Cluster](#accessing-the-cluster)
-- [Deploying Applications](#deploying-applications)
 - [Troubleshooting](#troubleshooting)
 - [Cost Estimation](#cost-estimation)
 - [Security Best Practices](#security-best-practices)
@@ -182,6 +180,20 @@ aws configure
 # Enter your Access Key ID, Secret Access Key, Region, and Output format
 ```
 
+---
+## Project Structure
+
+```
+.
+├── main.tf           # Main infrastructure definition
+├── providers.tf      # Provider configurations
+├── variables.tf      # Input variables
+├── outputs.tf        # Output values
+├── terraform.tfvars  # Variable values (create this file)
+└── README.md         # This file
+```
+
+---
 
 ## 🧩 Infrastructure Components
 
@@ -234,19 +246,7 @@ aws configure
 
 ---
 
-## Project Structure
 
-```
-.
-├── main.tf           # Main infrastructure definition
-├── providers.tf      # Provider configurations
-├── variables.tf      # Input variables
-├── outputs.tf        # Output values
-├── terraform.tfvars  # Variable values (create this file)
-└── README.md         # This file
-```
-
----
 
 ## 🚀 Deployment Steps
 
@@ -314,14 +314,13 @@ terraform apply tfplan
  **Terraform apply complete**
 ![Terraform apply](images/Terraform-apply-4.png)
 
-
-
 ### Step 6: Save Outputs
 
 ```bash
 terraform output > outputs.txt
 ```
 ![Terraform output](images/output.png)
+
 ---
 
 ## ✅ Verification
@@ -560,7 +559,7 @@ aws ec2 describe-security-groups --filters "Name=vpc-id,Values=vpc-xxx"
 ```bash
 terraform destroy -auto-approve
 ```
-
+![Terraform-destroy](images/Terraform-destroy.png)
 ---
 
 ## 📚 Additional Resources
