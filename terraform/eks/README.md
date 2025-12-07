@@ -230,66 +230,11 @@ aws configure
 - **Deployment:** Helm chart
 - **Purpose:** Automatically provisions ALBs/NLBs for Kubernetes Ingress resources
 
----
 
-## ⚡ Quick Start
-
-### 1. Clone the Repository
-
-```bash
-git clone <your-repo-url>
-cd ecommerce-eks-terraform
-```
-
-### 2. Review and Customize Variables
-
-Edit `terraform.tfvars` or use defaults in `variables.tf`:
-
-```hcl
-region               = "us-east-1"
-cluster_version      = "1.30"
-node_desired_size    = 2
-node_min_size        = 2
-node_max_size        = 4
-environment          = "Dev"
-admin_user_arn       = "arn:aws:iam::YOUR_ACCOUNT_ID:user/YOUR_USERNAME"
-```
-
-### 3. Initialize Terraform
-
-```bash
- - terraform init
- - terraform validate
-```
-
-![Initialize Terraform](images/terrinit.png)
-
-### 4. Plan the Deployment
-
-```bash
-terraform plan
-```
-
-![Terraform plan](images/terrinit.png)
-
-### 5. Apply the Configuration
-
-```bash
-terraform apply
-```
-
-Type `yes` when prompted.
-
-![Terraform apply](images/terrapply.png)
-
-**Expected deployment time:** 15-20 minutes
 
 ---
 
-## ⚙️ Configuration
-
-
-### Project Structure
+## Project Structure
 
 ```
 .
@@ -317,50 +262,66 @@ Type `yes` when prompted.
 ```bash
 terraform init
 ```
+![Initialize Terraform](images/Terraform-Initialize.png)
 
 **What happens:**
 - Downloads required provider plugins (AWS, Kubernetes, Helm)
 - Initializes backend configuration
 - Prepares working directory
+-
 
 ### Step 3: Validate Configuration
 
 ```bash
 terraform validate
 ```
-
-**Expected output:** `Success! The configuration is valid.`
-
+![Validation Terraform](images/Terraform-Validate.png)
 ### Step 4: Plan Deployment
 
 ```bash
 terraform plan -out=tfplan
 ```
-
 **Review:**
-- Number of resources to be created (~40-50 resources)
+
+- Number of resources to be created (~ 67 resources)
 - VPC and subnet configurations
 - EKS cluster settings
 - IAM roles and policies
+
+![Terraform plan](images/Terraform-plan-1.png)
+
+![Terraform plan](images/Terraform-plan-2png)
+
+
 
 ### Step 5: Apply Configuration
 
 ```bash
 terraform apply tfplan
 ```
-
 **Deployment stages:**
 1. VPC and networking (2-3 minutes)
 2. EKS control plane (8-10 minutes)
 3. Node group (3-5 minutes)
 4. Add-ons and ALB controller (2-3 minutes)
+ **Expected deployment time:** 15-20 minutes
+
+![Terraform apply](images/Terraform-apply-1.png)
+
+![Terraform apply](images/Terraform-apply-1.png)
+
+![Terraform apply](images/Terraform-apply-1.png)
+ **Terraform apply complete**
+![Terraform apply](images/Terraform-apply-1.png)
+
+
 
 ### Step 6: Save Outputs
 
 ```bash
 terraform output > outputs.txt
 ```
-
+![Terraform output](images/output.png)
 ---
 
 ## ✅ Verification
@@ -372,55 +333,48 @@ terraform output > outputs.txt
 ```bash
 aws eks describe-cluster --name ecommerce-eks-cluster --region us-east-1
 ```
+![EKS-Cluster](images/EKS-Cluster-termial.png)
 
-[📸 **ADD SCREENSHOT HERE: EKS cluster in AWS Console**]
+![EKS-Cluster](images/EKS-Cluster-console.png)
 
 #### Check Node Group
 
 ```bash
-aws eks describe-nodegroup \
-  --cluster-name ecommerce-eks-cluster \
-  --nodegroup-name ecommerce-eks-nodes \
-  --region us-east-1
+aws eks describe-nodegroup --cluster-name ecommerce-eks-cluster --nodegroup-name ecommerce-eks-nodes --region us-east-1
 ```
 
-[📸 **ADD SCREENSHOT HERE: Node group in AWS Console**]
+![Nodes](images/nodes-console.png)
 
 ### 2. Configure kubectl
 
 ```bash
 aws eks update-kubeconfig --region us-east-1 --name ecommerce-eks-cluster
 ```
+![update-kubeconfig ](images/kubeconfig-update.png)
 
-**Expected output:**
-```
-Added new context arn:aws:eks:us-east-1:ACCOUNT_ID:cluster/ecommerce-eks-cluster to ~/.kube/config
-```
 
 ### 3. Verify Cluster Access
 
 ```bash
 kubectl cluster-info
 ```
+![kubectl-cluster-info](images/cluster-info.png)
 
-[📸 **ADD SCREENSHOT HERE: kubectl cluster-info output**]
+
 
 ### 4. Check Nodes
 
 ```bash
 kubectl get nodes
 ```
+![Nodes](images/nodes-terminal.png)
 
-
-
-[📸 **ADD SCREENSHOT HERE: kubectl get nodes output**]
 
 ### 5. Verify System Pods
 
 ```bash
 kubectl get pods -n kube-system
 ```
-
 **Check for:**
 - `aws-load-balancer-controller` (2 replicas)
 - `ebs-csi-controller` (2 replicas)
@@ -428,19 +382,14 @@ kubectl get pods -n kube-system
 - `aws-node` (one per node)
 - `kube-proxy` (one per node)
 
-[📸 **ADD SCREENSHOT HERE: System pods running**]
+![kube-system_pods](images/kube-system_pods.png)
 
 ### 6. Verify ALB Controller
 
 ```bash
 kubectl get deployment -n kube-system aws-load-balancer-controller
 ```
-
-**Expected output:**
-```
-NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
-aws-load-balancer-controller   2/2     2            2           10m
-```
+![aws-load-balancer-controller](images/aws-load-balancer-controller.png)
 
 ### 7. Check Logs (if needed)
 
@@ -581,8 +530,6 @@ terraform destroy
 
 **Type `yes` when prompted.**
 
-[📸 **ADD SCREENSHOT HERE: Terraform destroy completion**]
-
 ### Verify Deletion
 
 ```bash
@@ -625,13 +572,3 @@ terraform destroy -auto-approve
 - [Kubernetes Documentation](https://kubernetes.io/docs/)
 
 ---
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-
-**Made with ❤️ for the E-commerce Platform**
-
-Last Updated: December 2024
