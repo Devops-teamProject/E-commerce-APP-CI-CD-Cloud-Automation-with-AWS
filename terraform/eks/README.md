@@ -308,11 +308,11 @@ terraform apply tfplan
 
 ![Terraform apply](images/Terraform-apply-1.png)
 
-![Terraform apply](images/Terraform-apply-1.png)
+![Terraform apply](images/Terraform-apply-2.png)
 
-![Terraform apply](images/Terraform-apply-1.png)
+![Terraform apply](images/Terraform-apply-3.png)
  **Terraform apply complete**
-![Terraform apply](images/Terraform-apply-1.png)
+![Terraform apply](images/Terraform-apply-4.png)
 
 
 
