@@ -19,7 +19,7 @@ module "vpc" {
   version = "5.0.0"
 
   name = "eks-vpc"
-  cidr = var.vpc_cidr               # VPC CIDR block (e.g.,                                       
+  cidr = var.vpc_cidr               # VPC CIDR block                                       
 
   azs = var.availability_zones                              # Availability Zones to use
   
@@ -147,7 +147,7 @@ data "aws_eks_cluster_auth" "eks_admin" {
 # Create access entry for your admin IAM user
 resource "aws_eks_access_entry" "admin" {
   cluster_name  = module.eks.cluster_name
-  principal_arn = var.admin_user_arn  # Your IAM user ARN
+  principal_arn = var.admin_user_arn  #  IAM user ARN
   type          = "STANDARD"  # Standard user (not EC2 node)
 
   depends_on = [module.eks]
@@ -169,7 +169,7 @@ resource "aws_eks_access_policy_association" "admin_access" {
 
 resource "aws_eks_access_entry" "admin_github_action" {
   cluster_name  = module.eks.cluster_name
-  principal_arn = var.admin_user_arn_github_actions  # Your IAM user ARN
+  principal_arn = var.admin_user_arn_github_actions  # IAM user ARN
   type          = "STANDARD"  # Standard user (not EC2 node)
 
   depends_on = [module.eks]
@@ -356,8 +356,6 @@ resource "helm_release" "aws_lb_controller" {
   namespace  = "kube-system"  # Deploy to system namespace
 
   # Chart configuration: Tell the controller about our cluster
-  
-  
    set {                 # Set the cluster name so controller knows which cluster to manage
           name = "clusterName"           
           value = module.eks.cluster_name
@@ -373,18 +371,14 @@ resource "helm_release" "aws_lb_controller" {
     value = "aws-load-balancer-controller"
      }
     
-   set {                  # Set AWS region for API calls
+   set {                 # Set AWS region for API calls
         name = "region"                 
         value = var.region 
-        }         
-              
-   set {                  # VPC ID where ALBs will be created
+        }             
+   set {                 # VPC ID where ALBs will be created
     name = "vpcId"                 
     value = module.vpc.vpc_id 
    }          
-                          
-  
-
 
   # Wait for service account and IAM role to be ready before deploying
   depends_on = [
