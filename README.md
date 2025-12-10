@@ -36,6 +36,7 @@ This project delivers a complete **DevOps pipeline** for a small **E‑commerce 
 
 ---
 
+
 ## 📊 Architecture
 
 **To be added later in `/docs/architecture.png`**
