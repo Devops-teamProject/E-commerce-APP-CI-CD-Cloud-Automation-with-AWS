@@ -401,9 +401,7 @@ jobs:
             --set alertmanager.service.port="9093" \
             --set alertmanager.alertmanagerSpec.routePrefix="/"
        
-       - name: Apply Monitor Ingress
-         run: |
-            kubectl apply -f k8s/ingress-monitor.yml
+
        
        - name: Wait for Monitoring Rollout
          run: |
@@ -412,11 +410,15 @@ jobs:
           kubectl rollout status deployment/prometheus-grafana -n monitoring --timeout=300s || true
           sleep 30
 
+       - name: Apply Monitor Ingress
+         run: |
+            kubectl apply -f k8s/ingress-monitor.yml
+
        - name: Wait and Get Monitoring ALB
          id: monitoring-ingress
          run: |
             echo "Waiting for Monitoring ALB..."
-            for i in {1..40}; do
+            for i in {1..10}; do
               ALB=$(kubectl get ingress monitoring-ingress -n monitoring -o jsonpath="{.status.loadBalancer.ingress[0].hostname}" || true)
               if [ ! -z "$ALB" ]; then break; fi
               sleep 15
