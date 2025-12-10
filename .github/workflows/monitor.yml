@@ -65,6 +65,11 @@ jobs:
            kubectl expose svc prometheus-kube-prometheus-prometheus --type=NodePort --target-port=9090 --name prometheus-kube-prometheus-prometheus-ext -n monitoring
            kubectl expose svc  prometheus-grafana --type=NodePort --target-port=3000 --name  prometheus-grafana-ext -n monitoring
            kubectl expose svc  prometheus-kube-prometheus-alertmanager --type=NodePort --target-port=9093 --name  prometheus-kube-prometheus-alertmanager-ext -n monitoring
+
+
+       - name: Apply Monitor Ingress
+         run: |
+            kubectl apply -f k8s/ingress-monitor.yml
            
 
 
