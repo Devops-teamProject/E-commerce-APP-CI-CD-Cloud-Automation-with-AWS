@@ -6,8 +6,8 @@ Complete AWS EKS infrastructure deployment using Terraform for a production-read
 
 - [Overview](#overview)
 - [Architecture](#architecture)
-- [Prerequisites](#prerequisites)
 - [Project Structure](#Project-Structure)
+- [Prerequisites](#prerequisites)
 - [Infrastructure Components](#infrastructure-components)
 - [Deployment Steps](#deployment-steps)
 - [Verification](#verification)
@@ -31,6 +31,7 @@ This project provisions a complete Kubernetes infrastructure on AWS EKS with the
 - **EBS CSI Driver** for persistent storage
 - **IRSA (IAM Roles for Service Accounts)** for secure AWS API access
 - **Managed node groups** 
+
 
 ---
 
@@ -151,6 +152,21 @@ graph LR
 6. **Helm Charts** → Deploys ALB Controller
 7. **Access Entries** → Grants admin user permissions
 
+
+---
+
+## Project Structure
+
+```
+.
+├── main.tf           # Main infrastructure definition
+├── providers.tf      # Provider configurations
+├── variables.tf      # Input variables
+├── outputs.tf        # Output values
+├── terraform.tfvars  # Variable values (create this file)
+└── README.md         # This file
+```
+
 ---
 
 ## Prerequisites
@@ -180,19 +196,6 @@ aws configure
 # Enter your Access Key ID, Secret Access Key, Region, and Output format
 ```
 
----
-
-## Project Structure
-
-```
-.
-├── main.tf           # Main infrastructure definition
-├── providers.tf      # Provider configurations
-├── variables.tf      # Input variables
-├── outputs.tf        # Output values
-├── terraform.tfvars  # Variable values (create this file)
-└── README.md         # This file
-```
 
 ---
 
