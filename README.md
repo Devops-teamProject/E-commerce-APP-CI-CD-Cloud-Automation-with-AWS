@@ -17,21 +17,21 @@
 ---
 ## Table of Contents
 
-- [Overview](#-overview)
-- [Features](#-features)
-- [Architecture](#-architecture)
-- [Tech Stack](#-tech-stack)
-- [Project Structure](#-project-structure)
-- [Prerequisites](#-prerequisites)
-- [Getting Started](#-getting-started)
-- [CI/CD Pipeline](#-cicd-pipeline)
-- [Security](#-security)
-- [Deployment](#-deployment)
-- [Monitoring](#-monitoring)
-- [Documentation](#-documentation)
-- [Contributing](#-contributing)
-- [Team](#-team)
-- [License](#-license)
+- [Overview](#overview)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Getting Started](#getting-started)
+- [CI/CD Pipeline](#cicd-pipeline)
+- [Security](#security)
+- [Deployment](#deployment)
+- [Monitoring](#monitoring)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [Team](#team)
+- [License](#license)
 
 ---
 
@@ -868,7 +868,7 @@ This project is developed and maintained by:
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
@@ -882,39 +882,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-
-##  Roadmap
-
-### Current Version: v1.0
-
-- ✅ Full stack e-commerce application
-- ✅ Complete CI/CD pipeline with GitHub Actions
-- ✅ Security scanning (Semgrep + Trivy)
-- ✅ AWS EKS deployment with Kubernetes
-- ✅ Infrastructure as Code with Terraform
-- ✅ Auto-scaling and load balancing
-
-### Future Enhancements (v2.0)
-
-- 🔄 Implement Prometheus & Grafana monitoring
-- 🔄 Add comprehensive test coverage (Jest, Cypress)
-- 🔄 Integrate ArgoCD for GitOps workflow
-- 🔄 Implement Istio service mesh
-- 🔄 Add Elasticsearch for product search
-- 🔄 Implement Redis for caching
-- 🔄 Add Helm charts for easier deployment
-- 🔄 Implement blue-green deployment strategy
-- 🔄 Add SSL/TLS certificates with cert-manager
-- 🔄 Implement advanced monitoring and alerting
-
----
-
-<div align="center">
-
-**⭐ Star this repository if you find it helpful!**
-
-Made with ❤️ by DevOps Team Project
-
-[Back to Top](#-e-commerce-application---full-stack-with-cicd--cloud-automation)
-
-</div>
