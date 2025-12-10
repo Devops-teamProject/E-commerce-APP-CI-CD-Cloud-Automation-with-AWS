@@ -314,7 +314,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: backend
     outputs:
-      alb_dns: ${{ steps.ingress.outputs.alb_dns }}
+      frontend_alb_dns: ${{ steps.frontend-ingress.outputs.frontend_alb_dns }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
@@ -342,13 +342,16 @@ jobs:
       - name: Deploy frontend
         run: kubectl apply -f k8s/frontend/.
       
-      - name: Get Ingress info
-        id: ingress
+      - name: Wait and Get Frontend ALB
+        id: frontend-ingress
         run: |
-          echo "Waiting for ALB to be provisioned..."
-          sleep 30
-          ALB=$(kubectl get ingress front-ingress -n frontend -o jsonpath="{.status.loadBalancer.ingress[0].hostname}")
-          echo "alb_dns=$ALB" >> $GITHUB_OUTPUT
+          echo "Waiting for Frontend ALB..."
+          for i in {1..10}; do
+            ALB=$(kubectl get ingress front-ingress -n frontend -o jsonpath="{.status.loadBalancer.ingress[0].hostname}" || true)
+            if [ ! -z "$ALB" ]; then break; fi
+            sleep 15
+          done
+          echo "frontend_alb_dns=$ALB" >> $GITHUB_OUTPUT
           echo "Frontend URL: http://$ALB"
 
 #------------------------monitoring
@@ -356,6 +359,8 @@ jobs:
      name: deploy prometheus and grafana
      runs-on: ubuntu-latest
      needs: deploy
+     outputs:
+       monitoring_alb_dns: ${{ steps.monitoring-ingress.outputs.monitoring_alb_dns }}
      env:
        AWS_REGION: us-east-1
        CLUSTER_NAME: ecommerce-eks-cluster
@@ -406,15 +411,27 @@ jobs:
           kubectl rollout status statefulset/alertmanager-prometheus-kube-prometheus-alertmanager -n monitoring --timeout=300s || true
           kubectl rollout status deployment/prometheus-grafana -n monitoring --timeout=300s || true
           sleep 30
+
+       - name: Wait and Get Monitoring ALB
+         id: monitoring-ingress
+         run: |
+            echo "Waiting for Monitoring ALB..."
+            for i in {1..10}; do
+              ALB=$(kubectl get ingress monitoring-ingress -n monitoring -o jsonpath="{.status.loadBalancer.ingress[0].hostname}" || true)
+              if [ ! -z "$ALB" ]; then break; fi
+              sleep 15
+            done
+            echo "monitoring_alb_dns=$ALB" >> $GITHUB_OUTPUT
+            echo "Monitoring URL: http://$ALB"
        
        - name: Show URLs
          run: |
-          echo "======================================"
-          echo "Frontend:     http://${{ needs.deploy.outputs.alb_dns }}"
-          echo "Grafana:      http://${{ needs.deploy.outputs.alb_dns }}/grafana"
-          echo "Prometheus:   http://${{ needs.deploy.outputs.alb_dns }}/prometheus"
-          echo "Alertmanager: http://${{ needs.deploy.outputs.alb_dns }}/alertmanager"
-          echo "======================================"
+           echo "======================================"
+           echo "Frontend:     http://${{ needs.deploy.outputs.frontend_alb_dns }}"
+           echo "Grafana:      http://${{ steps.monitoring-ingress.outputs.monitoring_alb_dns }}/grafana"
+           echo "Prometheus:   http://${{ steps.monitoring-ingress.outputs.monitoring_alb_dns }}/prometheus"
+           echo "Alertmanager: http://${{ steps.monitoring-ingress.outputs.monitoring_alb_dns }}/alertmanager"
+           echo "======================================"
 
 
 
