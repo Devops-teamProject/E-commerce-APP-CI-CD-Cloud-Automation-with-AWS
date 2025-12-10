@@ -10,6 +10,7 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing 
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
     alb.ingress.kubernetes.io/group.name: monitoring-alb
+    alb.ingress.kubernetes.io/group.order: '20'
 spec:
   ingressClassName: alb
   # ingressClassName: nginx

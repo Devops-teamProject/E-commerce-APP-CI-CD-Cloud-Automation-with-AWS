@@ -8,7 +8,9 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
     alb.ingress.kubernetes.io/group.name: monitoring-alb
+    alb.ingress.kubernetes.io/group.order: '10'
 spec:
+  ingressClassName: alb
   rules:
     - http:
         paths:
@@ -16,7 +18,7 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: grafana
+              name: prometheus-grafana
               port:
                 number: 3000
         - path: /prometheus
@@ -30,6 +32,6 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: alertmanager-kube-prometheus-alertmanager
+              name: prometheus-kube-prometheus-alertmanager
               port:
                 number: 9093
