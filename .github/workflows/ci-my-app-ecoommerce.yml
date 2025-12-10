@@ -416,7 +416,7 @@ jobs:
          id: monitoring-ingress
          run: |
             echo "Waiting for Monitoring ALB..."
-            for i in {1..10}; do
+            for i in {1..40}; do
               ALB=$(kubectl get ingress monitoring-ingress -n monitoring -o jsonpath="{.status.loadBalancer.ingress[0].hostname}" || true)
               if [ ! -z "$ALB" ]; then break; fi
               sleep 15
