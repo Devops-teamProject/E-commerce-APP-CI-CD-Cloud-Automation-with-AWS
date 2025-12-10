@@ -385,16 +385,16 @@ jobs:
           helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
             --namespace monitoring --create-namespace \
             --set grafana.service.type=ClusterIP \
-            --set grafana.service.port=3000 \
+            --set grafana.service.port="3000" \
             --set grafana.adminPassword=${{ secrets.GRAFANA_ADMIN_PASSWORD }} \
-            --set grafana.grafana\.ini.server.root_url='%(protocol)s://%(domain)s/grafana' \
+            --set grafana.grafana\.ini.server.root_url="%(protocol)s://%(domain)s/grafana" \
             --set grafana.grafana\.ini.server.serve_from_sub_path=true \
             --set prometheus.service.type=ClusterIP \
-            --set prometheus.service.port=9090 \
-            --set prometheus.prometheusSpec.routePrefix=/ \
+            --set prometheus.service.port="9090" \
+            --set prometheus.prometheusSpec.routePrefix="/" \
             --set alertmanager.service.type=ClusterIP \
-            --set alertmanager.service.port=9093 \
-            --set alertmanager.alertmanagerSpec.routePrefix=/
+            --set alertmanager.service.port="9093" \
+            --set alertmanager.alertmanagerSpec.routePrefix="/"
        
        - name: Apply Monitor Ingress
          run: |
