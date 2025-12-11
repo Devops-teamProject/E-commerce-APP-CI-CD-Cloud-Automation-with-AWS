@@ -70,6 +70,39 @@ jobs:
        - name: Apply Monitor Ingress
          run: |
             kubectl apply -f k8s/ingress-monitor.yml
+
+
+#        - name: Wait for Monitoring Rollout
+#          run: |
+#           kubectl rollout status statefulset/prometheus-prometheus-kube-prometheus-prometheus -n monitoring --timeout=300s || true
+#           kubectl rollout status statefulset/alertmanager-prometheus-kube-prometheus-alertmanager -n monitoring --timeout=300s || true
+#           kubectl rollout status deployment/prometheus-grafana -n monitoring --timeout=300s || true
+#           sleep 30
+
+#        - name: Apply Monitor Ingress
+#          run: |
+#             kubectl apply -f k8s/ingress-monitor.yml
+
+#        - name: Wait and Get Monitoring ALB
+#          id: monitoring-ingress
+#          run: |
+#             echo "Waiting for Monitoring ALB..."
+#             for i in {1..10}; do
+#               ALB=$(kubectl get ingress monitoring-ingress -n monitoring -o jsonpath="{.status.loadBalancer.ingress[0].hostname}" || true)
+#               if [ ! -z "$ALB" ]; then break; fi
+#               sleep 15
+#             done
+#             echo "monitoring_alb_dns=$ALB" >> $GITHUB_OUTPUT
+#             echo "Monitoring URL: http://$ALB"
+       
+#        - name: Show URLs
+#          run: |
+#            echo "======================================"
+#            echo "Frontend:     http://${{ needs.deploy.outputs.frontend_alb_dns }}"
+#            echo "Grafana:      http://${{ steps.monitoring-ingress.outputs.monitoring_alb_dns }}/grafana"
+#            echo "Prometheus:   http://${{ steps.monitoring-ingress.outputs.monitoring_alb_dns }}/prometheus"
+#            echo "Alertmanager: http://${{ steps.monitoring-ingress.outputs.monitoring_alb_dns }}/alertmanager"
+#            echo "======================================"
            
 
 

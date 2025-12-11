@@ -1,0 +1,48 @@
+name: monitor-2-eks
+on:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #   - main
+
+jobs:
+#------------------------monitoring-------------------
+ deploy-monitoring:
+  name: Deploy Prometheus & Grafana
+  runs-on: ubuntu-latest
+  env:
+    AWS_REGION: us-east-1
+    CLUSTER_NAME: ecommerce-eks-cluster
+
+  steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v5
+      with:
+        aws-access-key-id: ${{ secrets.aws_access_key_id }}
+        aws-secret-access-key: ${{ secrets.aws_secret_access_key }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Update kubeconfig
+      run: |
+        aws eks --region ${{ env.AWS_REGION }} update-kubeconfig --name ${{ env.CLUSTER_NAME }}
+
+    - name: Setup Helm
+      uses: azure/setup-helm@v3
+
+    - name: Add Prometheus Helm Repo
+      run: |
+        helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+        helm repo update
+
+    - name: Create Namespace if not exist
+      run: |
+        kubectl get ns monitoring || kubectl create ns monitoring
+
+    - name: Deploy Prometheus & Grafana (Helm Upgrade/Install)
+      run: |
+        helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+          -n monitoring \
+          -f k8s/monitoring-values.yaml
