@@ -1,62 +1,67 @@
 name: monitor-2-eks
+
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #   - main
 
 jobs:
-#------------------------monitoring-------------------
- deploy-monitoring:
-  name: Deploy Prometheus & Grafana
-  runs-on: ubuntu-latest
-  env:
-    AWS_REGION: us-east-1
-    CLUSTER_NAME: ecommerce-eks-cluster
+  deploy-monitoring:
+    name: Deploy Prometheus & Grafana
+    runs-on: ubuntu-latest
 
-  steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+    env:
+      AWS_REGION: us-east-1
+      CLUSTER_NAME: ecommerce-eks-cluster
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v5
-      with:
-        aws-access-key-id: ${{ secrets.aws_access_key_id }}
-        aws-secret-access-key: ${{ secrets.aws_secret_access_key }}
-        aws-region: ${{ env.AWS_REGION }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Update kubeconfig
-      run: |
-        aws eks --region ${{ env.AWS_REGION }} update-kubeconfig --name ${{ env.CLUSTER_NAME }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          aws-access-key-id: ${{ secrets.aws_access_key_id }}
+          aws-secret-access-key: ${{ secrets.aws_secret_access_key }}
+          aws-region: ${{ env.AWS_REGION }}
 
-    - name: Setup Helm
-      uses: azure/setup-helm@v3
+      - name: Update kubeconfig
+        run: |
+          aws eks --region ${{ env.AWS_REGION }} update-kubeconfig --name ${{ env.CLUSTER_NAME }}
 
-    - name: Add Prometheus Helm Repo
-      run: |
-        helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-        helm repo update
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
 
-    - name: Create Namespace if not exist
-      run: |
-        kubectl get ns monitoring || kubectl create ns monitoring
+      - name: Add Prometheus Helm Repo
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo update
 
-    - name: expose-svc
-      run: |
-        kubectl patch svc monitoring-kube-prometheus-prometheus \
-        -n monitoring \
-        -p '{"spec":{"type":"NodePort"}}'
+      - name: Create Namespace if not exist
+        run: |
+          kubectl get ns monitoring || kubectl create ns monitoring
 
-        kubectl patch svc monitoring-grafana \
-        -n monitoring \
-        -p '{"spec":{"type":"NodePort"}}'
+      # ✅ FIRST: install monitoring stack
+      - name: Deploy Prometheus & Grafana
+        run: |
+          helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+            -n monitoring \
+            -f k8s/monitoring-values.yaml
 
-        kubectl patch svc monitoring-kube-prometheus-alertmanager \
-        -n monitoring \
-        -p '{"spec":{"type":"NodePort"}}'
+      # ⏳ Optional but recommended
+      - name: Wait for services
+        run: |
+          sleep 30
 
-    - name: Deploy Prometheus & Grafana (Helm Upgrade/Install)
-      run: |
-        helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
-          -n monitoring \
-          -f k8s/monitoring-values.yaml
+      # ✅ THEN: patch services
+      - name: Expose Monitoring Services
+        run: |
+          kubectl patch svc monitoring-kube-prometheus-prometheus \
+            -n monitoring \
+            -p '{"spec":{"type":"NodePort"}}'
+
+          kubectl patch svc monitoring-grafana \
+            -n monitoring \
+            -p '{"spec":{"type":"NodePort"}}'
+
+          kubectl patch svc monitoring-kube-prometheus-alertmanager \
+            -n monitoring \
+            -p '{"spec":{"type":"NodePort"}}'
