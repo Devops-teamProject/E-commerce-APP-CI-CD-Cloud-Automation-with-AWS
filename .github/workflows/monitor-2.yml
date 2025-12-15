@@ -43,9 +43,17 @@ jobs:
 
     - name: expose-svc
       run: |
-           kubectl expose svc monitoring-kube-prometheus-prometheus --type=NodePort --target-port=9090 --name monitoring-kube-prometheus-prometheus -n monitoring
-           kubectl expose svc  monitoring-grafana --type=NodePort --target-port=80 --name  monitoring-grafana -n monitoring
-           kubectl expose svc  monitoring-kube-prometheus-alertmanager --type=NodePort --target-port=9093 --name  monitoring-kube-prometheus-alertmanager -n monitoring
+        kubectl patch svc monitoring-kube-prometheus-prometheus \
+        -n monitoring \
+        -p '{"spec":{"type":"NodePort"}}'
+
+        kubectl patch svc monitoring-grafana \
+        -n monitoring \
+        -p '{"spec":{"type":"NodePort"}}'
+
+        kubectl patch svc monitoring-kube-prometheus-alertmanager \
+        -n monitoring \
+        -p '{"spec":{"type":"NodePort"}}'
 
     - name: Deploy Prometheus & Grafana (Helm Upgrade/Install)
       run: |
