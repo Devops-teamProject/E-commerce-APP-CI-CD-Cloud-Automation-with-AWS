@@ -345,15 +345,22 @@ jobs:
       - name: Wait for Frontend ALB
         id: frontend-ingress
         run: |
-          echo "Waiting for Frontend ALB to become ready..."
-          kubectl wait --for=condition=ready ingress/front-ingress -n frontend --timeout=10m
-          ALB=$(kubectl get ingress front-ingress -n frontend -o jsonpath="{.status.loadBalancer.ingress[0].hostname}")
-          if [ -z "$ALB" ]; then
-            echo "ERROR: Frontend ALB did not appear in time!"
-            exit 1
-          fi
-          echo "frontend_alb_dns=$ALB" >> $GITHUB_OUTPUT
-          echo "Frontend URL: http://$ALB"
+          echo "Waiting for Frontend ALB hostname..."
+
+          for i in {1..60}; do
+            ALB=$(kubectl get ingress front-ingress -n frontend -o jsonpath="{.status.loadBalancer.ingress[0].hostname}")
+            if [ -n "$ALB" ]; then
+              echo "ALB is ready: $ALB"
+              echo "frontend_alb_dns=$ALB" >> $GITHUB_OUTPUT
+              echo "Frontend URL: http://$ALB"
+              exit 0
+            fi
+            echo "Still waiting for ALB... ($i)"
+            sleep 10
+          done
+
+          echo "ERROR: Frontend ALB did not appear in time!"
+          exit 1
 
       - name: Show Frontend URL
         run: |
